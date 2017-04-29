@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Spyder Editor
-
-This is a temporary script file.
+fireReader.py
+Takes a csv file from 
+https://firms.modaps.eosdis.nasa.gov/active_fire/viirs/text/VNP14IMGTDL_NRT_Australia_and_New_Zealand_24h.csv
+and processes coordinates where fire is detected into clusters of points
+that represent a possible larger fire.
+Written for NASA Space Apps Challenge 2017
+Lachlan Robinson 30/04/2017
 """
 
 import pandas as pd
@@ -123,6 +127,8 @@ for j in RealClusters:
     for i in j:
         RealCoord.append((df[0][i+1],df[1][i+1],df[5][i+1],df[6][i+1]))
     RealCoords.append(RealCoord)
+    
+latestUpdate = df[0][len(df[0])]
     
 endTime = time.clock()
 print('Processing time: %f' %(endTime-startTime))
