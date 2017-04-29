@@ -125,10 +125,60 @@ RealCoords = []
 for j in RealClusters:
     RealCoord = []
     for i in j:
-        RealCoord.append((df[0][i+1],df[1][i+1],df[5][i+1],df[6][i+1]))
+        #YYYY-MM-DDThh:mm:ssZ
+        RealCoord.append((math.degrees(df[0][i+1]),math.degrees(df[1][i+1]),
+                          (df[5][i+1] + 'T' + df[6][i+1][:2] + ':' + df[6][i+1][2:] + ':00Z'),
+                          int(df[5][i+1][8:10] + df[6][i+1][:2] + df[6][i+1][2:])))
     RealCoords.append(RealCoord)
     
-latestUpdate = df[0][len(df[0])]
-    
+latestUpdate = df[5][len(df[0])-1] + 'T' + df[6][len(df[0])-1][:2] + ':' + df[6][len(df[0])-1][2:] + ':00Z'
+
+things = []
+#timeVecs = []
+state = []
+for i in range(len(RealCoords)):
+    #timeVec = []
+    thing = []
+    RealCoords[i] = sorted(RealCoords[i], key=lambda time: time[3])
+    for j in range(len(RealCoords[i])):
+        thing.append(RealCoords[i][j][3])
+        thingy = np.histogram(thing)
+    things.append(thingy)
+#    for j in range(1,len(RealCoords[i])):
+#        timeVec.append(RealCoords[i][j][3] - RealCoords[i][j-1][3])
+#    timeVecs.append(timeVec)    
+#    for k in reversed(range(len(timeVec))):
+#        if timeVec[k]>500 and k>(len(timeVec)/2):
+#            print(i,k,'greater')
+#            state.append(-1)
+#            break
+#        elif timeVec[k]>500 and k<(len(timeVec)/2):
+#            print(i,k,'lesser')
+#            state.append(1)
+#            break
+#        elif k == 0:
+#            state.append(0)
+#            print(i,k)
+
+for i in things:
+    last = 0
+    first = -1
+    for j in reversed(i[0]):
+        if j and not last:
+            last = j
+            continue
+        if j and last:
+            first = j
+    #print(last,first)
+    if first >-1:
+        if last>first:
+            state.append(1)
+        elif first>last:
+            state.append(-1)
+        else:
+            state.append(0)
+    else:
+        state.append(0)
+
 endTime = time.clock()
 print('Processing time: %f' %(endTime-startTime))
