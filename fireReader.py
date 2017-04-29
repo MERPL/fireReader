@@ -9,6 +9,8 @@ import pandas as pd
 import math
 import numpy as np
 import time
+
+startTime = time.clock()
    
 def cheapDist(lat1,lon1,lat2,lon2):
     R = 6371e3 # metres
@@ -75,15 +77,52 @@ w = csv.writer(f)
 w.writerows(CloseTotal)
 f.close()
 
-#print('starting distance check loop')
-#
-#wd =pd.read_csv('results.csv', sep=',',header=None)
-#
-#del j, i
-#
-#for j in range(0,len(wd)):
-#    for i in range(0,len(wd)):
-#        wd[j][i] = wd[j][i]<np.float64(400)
-#    print(j)
-#    
-#wd.to_csv('closest.csv',sep=',',header=None)
+def ClusterFunc(outer,Cluster,start):
+    appended = False
+    for j in outer:
+        if j in Cluster:
+            continue
+        for i in range(len(CloseTotal[j])):
+            if CloseTotal[j][i] > 0:
+                if True==start:
+                    Cluster.append(j)
+                    start=False
+                Cluster.append(i)
+    if False==start and True==appended:
+        ClusterFunc(Cluster,Cluster,start)
+    return start
+            
+Clusters = []
+Cluster = []
+ClusterIndex = []
+start = True
+for j in range(len(CloseTotal)):
+    #print(j, start)
+    j = [j]
+    if False==start:
+        ClusterIndex.append(len(Cluster))
+        Clusters.append(Cluster)
+        Cluster = []
+        start = True
+        continue
+    start = ClusterFunc(j,Cluster,start)
+
+f = open('clusters.csv','w',newline='')
+w = csv.writer(f)
+w.writerows(Clusters)
+f.close()
+
+RealClusters = []
+for j in range(len(ClusterIndex)):
+    if ClusterIndex[j]>3:
+        RealClusters.append(Clusters[j])
+
+RealCoords = []
+for j in RealClusters:
+    RealCoord = []
+    for i in j:
+        RealCoord.append((df[0][i+1],df[1][i+1],df[5][i+1],df[6][i+1]))
+    RealCoords.append(RealCoord)
+    
+endTime = time.clock()
+print('Processing time: %f' %(endTime-startTime))
